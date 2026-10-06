@@ -152,12 +152,16 @@ int convolution(const matrix* src, const matrix_kernel* kernel, matrix* res)
     
     int h_bias = (kernel->DH) / 2;
     int w_bias = (kernel->DW) / 2;
+
+    // Проход по исходной матрице
     for (int i = 0; i < (int)src->H; ++i) 
     {
         for (int j = 0; j < (int)src->W; ++j) 
         {
             int32_t value = 0;
             size_t pos_d = 0;
+
+            // Проход по ядру: центр ядра в текущей позиции (i, j)
             for (int h_it = i - h_bias; h_it <= i + h_bias; ++h_it) 
             {
                 for (int w_it = j - w_bias; w_it <= j + w_bias; ++w_it) 
@@ -261,37 +265,19 @@ int main (int argc, char** argv)
     }
 
     err = convolution(&A, &D, &Ar);
-    if (err != 0)
-    {
-        free(A.start); free(B.start); free(C.start);
-        free(D.start);
-        free(Ar.start); free(Br.start); free(Cr.start);
-        return err;
-    }
+    if (err != 0) goto cleanup;
 
     err = convolution(&B, &D, &Br);
-    if (err != 0)
-    {
-        free(A.start); free(B.start); free(C.start);
-        free(D.start);
-        free(Ar.start); free(Br.start); free(Cr.start);
-        return err;
-    }
+    if (err != 0) goto cleanup;
 
     err = convolution(&C, &D, &Cr);
-    if (err != 0)
-    {
-        free(A.start); free(B.start); free(C.start);
-        free(D.start);
-        free(Ar.start); free(Br.start); free(Cr.start);
-        return err;
-    }
+    if (err != 0) goto cleanup;
 
     err = write_data(output_file, &Ar, &Br, &Cr);
 
+cleanup:
     free(A.start); free(B.start); free(C.start);
     free(D.start);
     free(Ar.start); free(Br.start); free(Cr.start);
-
     return err;
 }
